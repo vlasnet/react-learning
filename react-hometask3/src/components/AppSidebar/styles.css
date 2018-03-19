@@ -1,0 +1,5 @@
+.App__sidebar {
+    -ms-flex: 0 0 20%;
+    flex: 0 0 20%;
+    padding-top: 20px;
+}
