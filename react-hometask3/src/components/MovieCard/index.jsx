@@ -5,15 +5,9 @@ import './styles.css';
 const MovieCard = ({id, poster_path, title, overview, vote_average, release_date, onCardClick}) => {
     let img = (`https://image.tmdb.org/t/p/w300/${poster_path}`);
     const handleClick = () => {
-        let movie = {
-            id: id,
-            img: poster_path,
-            title: title,
-            release: release_date,
-            rating: vote_average
-        };
-        onCardClick(movie);
+        onCardClick(id);
     };
+
     return <div className="MovieCard" id={id}>
         <span className="MovieCard__rating">{vote_average}</span>
         <img src={img} alt="" className="MovieCard__poster"/>
@@ -32,7 +26,7 @@ MovieCard.propTypes = {
     overview: PropTypes.string.isRequired,
     vote_average: PropTypes.number.isRequired,
     release_date: PropTypes.string.isRequired,
-    // onCardClick: PropTypes.func.isRequired
+    onCardClick: PropTypes.func.isRequired
 };
 
 export default MovieCard;

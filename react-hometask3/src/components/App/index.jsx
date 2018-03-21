@@ -3,39 +3,52 @@ import React from 'react';
 import Header from 'components/Header';
 import MovieList from 'components/MovieList';
 import AppSidebar from "components/AppSidebar";
+import SearchForm from 'components/SearchForm';
+import SearchCategories from "components/SearchCategiries";
+import Watchlist from "components/Watchlist";
 import './styles.css';
-import {fetchMovies, searchMovie} from "../../api";
+import {searchMovieByName, searchMoviesByCategories} from "../../api";
 
 export default class App extends React.Component {
     state = {
         moviesList: [],
-        watchlist: JSON.parse(localStorage.getItem('watchlist')) || []
+        watchlist: [],
     };
 
     componentDidMount() {
         this.getMoviesByCategory('popular');
+        if (localStorage.getItem('watchlist')) {
+            this.setState({watchlist: JSON.parse(localStorage.getItem('watchlist'))})
+        }
     };
 
     componentWillUpdate(nextProps, nextState) {
-        localStorage.setItem('watchlist', JSON.stringify(nextState.watchlist));
+        if (this.state.watchlist.length !== nextState.watchlist.length) {
+            localStorage.setItem('watchlist', JSON.stringify(nextState.watchlist));
+        }
     }
 
     getMoviesByCategory = (category) => {
-        fetchMovies(category).then(data => {
+        searchMoviesByCategories(category).then(data => {
             this.setState({moviesList: data});
         });
     };
 
     handleMovieSearch = query => {
-        searchMovie(query).then(data => {
-            this.setState({moviesList: data});
-        });
+        if (query === null || query.trim() === "") {
+            alert("Please insert movie name that you are looking for");
+        } else {
+            searchMovieByName(query).then(data => {
+                this.setState({moviesList: data});
+            });
+        }
     };
 
-    handleAddMovie = movie => {
-        this.includeMovie = this.state.watchlist.filter(elem => elem.id === movie.id).length;
+    handleAddMovie = id => {
+        let movie = this.state.moviesList.filter(item => item.id === id)[0];
+        let includeMovie = this.state.watchlist.filter(elem => elem.id === movie.id).length;
 
-        if (!this.includeMovie) {
+        if (!includeMovie) {
             this.setState(prevState => ({
                 watchlist: [...prevState.watchlist, movie],
             }))
@@ -54,8 +67,11 @@ export default class App extends React.Component {
             <div className="App">
                 <Header text="movie mate"> </Header>
                 <div className="App__body">
-                    <AppSidebar className="App__sidebar" watchlist={watchlist} onWatchCardClick={this.handleDeleteMovie}
-                                onSearch={this.handleMovieSearch} onCategorySearch={this.getMoviesByCategory}/>
+                    <AppSidebar>
+                        <SearchForm onSearch={this.handleMovieSearch}/>
+                        <SearchCategories onCategorySearch={this.getMoviesByCategory}/>
+                        <Watchlist watchlist={watchlist} onWatchCardClick={this.handleDeleteMovie}/>
+                    </AppSidebar>
                     <MovieList movies={moviesList} onCardClick={this.handleAddMovie}/>
                 </div>
             </div>
